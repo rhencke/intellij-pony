@@ -1,0 +1,429 @@
+{
+    parserClass="com.github.rhencke.intellij_pony.parser.PonyParser"
+
+    implements="com.github.rhencke.intellij_pony.psi.PonyElement"
+    extends="com.github.rhencke.intellij_pony.psi.impl.PonyElementImpl"
+    psiClassPrefix="Pony"
+    psiImplClassSuffix="Impl"
+    psiPackage="com.github.rhencke.intellij_pony.psi"
+    psiImplPackage="com.github.rhencke.intellij_pony.psi.impl"
+    elementTypeHolderClass="com.github.rhencke.intellij_pony.psi.PonyElementTypes"
+
+    elementTypeClass="com.github.rhencke.intellij_pony.psi.PonyElementType"
+    tokenTypeClass="com.github.rhencke.intellij_pony.psi.PonyTokenType"
+    tokenTypeFactory="com.github.rhencke.intellij_pony.PonyElementFactory.getTokenType"
+    psiImplUtilClass="com.github.rhencke.intellij_pony.psi.impl.PonyPsiImplUtil"
+    tokens=[
+//        ACTOR="actor"
+//        ADDRESSOF="addressof"
+//        AND="and"
+//        AS="as"
+//        BE="be"
+//        BOX="box"
+//        BREAK="break"
+//        CLASS="class"
+//        COMPILE_ERROR="compile_error"
+//        COMPILE_INTRINSIC="compile_intrinsic"
+//        CONSUME="consume"
+//        CONTINUE="continue"
+//        DIGESTOF="digestof"
+//        DO="do"
+//        ELSE="else"
+//        ELSEIF="elseif"
+//        EMBED="embed"
+//        END="end"
+//        ERROR="error"
+//        FALSE="false"
+//        FOR="for"
+//        FUN="fun"
+//        IF="if"
+//        IFDEF="ifdef"
+//        IN="in"
+//        INTERFACE="interface"
+//        IS="is"
+//        ISNT="isnt"
+//        ISO="iso"
+//        LAMBDA="lambda"
+//        LET="let"
+//        LOC="__loc"
+//        MATCH="match"
+//        NEW="new"
+//        NOT="not"
+//        OBJECT="object"
+//        OR="or"
+//        PRIMITIVE="primitive"
+//        PRIMITIVE="primitive"
+//        RECOVER="recover"
+//        REF="ref"
+//        REPEAT="repeat"
+//        RETURN="return"
+//        STRUCT="struct"
+//        TAG="tag"
+//        THEN="then"
+//        THIS="this"
+//        TRAIT="trait"
+//        TRN="trn"
+//        TRUE="true"
+//        TRY="try"
+//        TYPE="type"
+//        UNTIL="until"
+//        USE="use"
+//        VAL="val"
+//        VAR="var"
+//        WHERE="where"
+//        WHILE="while"
+//        WITH="with"
+//        XOR="xor"
+//
+//        AMPERSAND="&"
+//        BSLASH="\\"
+//        CARAT="^"
+//        CINNAMONROLL="@"
+//        COLON=":"
+//        COMMA=","
+//        DOT="."
+//        DOT_DOT_DOT="..."
+//        DOT_GT=".>"
+//        EQ="="
+//        EQ_EQ="=="
+//        EQ_EQ_TILDE="==~"
+//        EXCL="!"
+//        EXCL_EQ="!="
+//        EXCL_EQ_TILDE="!=~"
+//        FSLASH="/"
+//        FSLASH_TILDE="/~"
+//        GT=">"
+//        GT_EQ=">="
+//        GT_EQ_TILDE=">=~"
+//        GT_GT=">>"
+//        GT_GT_TILDE=">>~"
+//        GT_TILDE=">~"
+//        LBRAK="["
+//        LCURLY="{"
+//        LPAREN="("
+//        LT="<"
+//        LT_EQ="<="
+//        LT_EQ_TILDE="<=~"
+//        LT_LT="<<"
+//        LT_LT_TILDE="<<~"
+//        LT_TILDE="<~"
+//        MINUS="-"
+//        MINUS_TILDE="-~"
+//        PERCENT="%"
+//        PERCENT_TILDE="%~"
+//        PIPE="|"
+//        PLUS="+"
+//        PLUS_TILDE="+~"
+//        RBRAK="]"
+//        RCURLY="}"
+//        RPAREN=")"
+//        SEMI=";"
+//        STAR="*"
+//        STAR_TILDE="*~"
+//        STRONG_ROCKET="=>"
+//        TILDE="~"
+//        WAT="?"
+//        WEAK_ROCKET="->"
+//
+//        POUND_ALIAS="#alias"
+//        POUND_ANY="#any"
+//        POUND_READ="#read"
+//        POUND_SEND="#send"
+//        POUND_SHARE="#share"
+    ]
+}
+
+module
+    ::= STRING? use_stmt* class_def*
+
+use_stmt
+    ::= USE (ID EQ)? (STRING | use_ffi) (IF infix)?
+
+use_ffi
+    ::= CINNAMONROLL (ID | STRING) typeargs (LPAREN | LPAREN_NEW) params? RPAREN WAT?
+
+class_def
+    ::= (TYPE | INTERFACE | TRAIT | PRIMITIVE | STRUCT | CLASS | ACTOR) annotation? CINNAMONROLL? cap? id_decl typeparams? (IS type_def)? STRING? members
+
+id_decl ::= ID
+
+annotation
+    ::= BSLASH ID (COMMA ID)* BSLASH
+
+members
+    ::= field* method*
+
+field
+    ::= (VAR | LET | EMBED) ID COLON type_def (EQ infix)?
+
+method
+    ::=  (FUN | BE | NEW) annotation? cap? ID typeparams? (LPAREN | LPAREN_NEW) params? RPAREN (COLON type_def)? WAT? STRING? (IF rawseq)? (STRONG_ROCKET rawseq)?
+
+annotatedrawseq
+    ::= annotation? (exprseq | jump)
+
+rawseq
+    ::= exprseq
+    | jump
+
+exprseq
+    ::= assignment (semiexpr | nosemi)?
+
+nextexprseq
+    ::= nextassignment (semiexpr | nosemi)?
+
+nosemi
+    ::= nextexprseq
+    | jump
+
+semiexpr
+    ::= SEMI (exprseq | jump)
+
+jump
+    ::= (RETURN | BREAK | CONTINUE | ERROR | COMPILE_INTRINSIC | COMPILE_ERROR) rawseq?
+
+nextassignment
+    ::= nextinfix (EQ assignment)?
+
+assignment
+    ::= infix (EQ assignment)?
+
+nextinfix
+    ::= nextterm antlr_0*
+
+infix
+    ::= term antlr_1*
+
+binop
+    ::= (AND | OR | XOR
+        | PLUS | MINUS | STAR | FSLASH | PERCENT
+        | PLUS_TILDE | MINUS_TILDE | STAR_TILDE | FSLASH_TILDE | PERCENT_TILDE
+        | LT_LT | GT_GT
+        | LT_LT_TILDE | GT_GT_TILDE
+        | IS | ISNT
+        | EQ_EQ | EXCL_EQ | LT | LT_EQ | GT_EQ | GT
+        | EQ_EQ_TILDE | EXCL_EQ_TILDE | LT_TILDE | LT_EQ_TILDE | GT_EQ_TILDE | GT_TILDE
+        ) term
+
+nextterm
+    ::= IF annotation? rawseq THEN rawseq (elseifexpr | (ELSE annotatedrawseq))? END
+    | IFDEF annotation? infix THEN rawseq (elseifdef | (ELSE annotatedrawseq))? END
+    | MATCH annotation? rawseq caseexpr* (ELSE annotatedrawseq)? END
+    | WHILE annotation? rawseq DO rawseq (ELSE annotatedrawseq)? END
+    | REPEAT annotation? rawseq UNTIL annotatedrawseq (ELSE annotatedrawseq)? END
+    | FOR annotation? idseq IN rawseq DO rawseq (ELSE annotatedrawseq)? END
+    | WITH annotation? (withelem (COMMA withelem)*) DO rawseq (ELSE annotatedrawseq)? END
+    | TRY annotation? rawseq (ELSE annotatedrawseq)? (THEN annotatedrawseq)? END
+    | RECOVER annotation? cap? rawseq END
+    | CONSUME cap? term
+    | nextpattern
+    | POUND postfix
+
+term
+    ::= IF annotation? rawseq THEN rawseq (elseifexpr | (ELSE annotatedrawseq))? END
+    | IFDEF annotation? infix THEN rawseq (elseifdef | (ELSE annotatedrawseq))? END
+    | MATCH annotation? rawseq caseexpr* (ELSE annotatedrawseq)? END
+    | WHILE annotation? rawseq DO rawseq (ELSE annotatedrawseq)? END
+    | REPEAT annotation? rawseq UNTIL annotatedrawseq (ELSE annotatedrawseq)? END
+    | FOR annotation? idseq IN rawseq DO rawseq (ELSE annotatedrawseq)? END
+    | WITH annotation? (withelem (COMMA withelem)*) DO rawseq (ELSE annotatedrawseq)? END
+    | TRY annotation? rawseq (ELSE annotatedrawseq)? (THEN annotatedrawseq)? END
+    | RECOVER annotation? cap? rawseq END
+    | CONSUME cap? term
+    | pattern
+    | POUND postfix
+    ;
+
+withelem
+    ::= idseq EQ rawseq
+
+caseexpr
+    ::= PIPE annotation? pattern? (IF rawseq)? (STRONG_ROCKET rawseq)?
+
+elseifdef
+    ::= ELSEIF annotation? infix THEN rawseq (elseifdef | (ELSE annotatedrawseq))?
+
+elseifexpr
+    ::= ELSEIF annotation? rawseq THEN rawseq (elseifexpr | (ELSE annotatedrawseq))?
+
+idseq
+    ::= ID
+    | (LPAREN | LPAREN_NEW) idseq_in_seq (COMMA idseq_in_seq)* RPAREN
+
+idseq_in_seq
+    ::= ID
+    | (LPAREN | LPAREN_NEW) idseq_in_seq (COMMA idseq_in_seq)* RPAREN
+
+nextpattern
+    ::= (VAR | LET | EMBED) ID (COLON type_def)?
+    | nextparampattern
+
+pattern
+    ::= (VAR | LET | EMBED) ID (COLON type_def)?
+    | parampattern
+
+nextparampattern
+    ::= (NOT | ADDRESSOF | MINUS_NEW | MINUS_TILDE_NEW | DIGESTOF) parampattern
+    | nextpostfix
+
+parampattern
+    ::= (NOT | ADDRESSOF | MINUS | MINUS_TILDE | MINUS_NEW | MINUS_TILDE_NEW | DIGESTOF) parampattern
+    | postfix
+
+nextpostfix
+  ::= nextatom antlr_2*
+
+postfix
+  ::= atom antlr_3*
+
+call
+  ::= LPAREN positional? named? RPAREN
+
+chain_id
+  ::= DOT_GT ID
+
+tilde_id
+  ::= TILDE ID
+
+dot_id
+  ::= DOT ID
+
+nextatom
+    ::= ID
+    | THIS
+    | literal
+    | LPAREN_NEW rawseq tuple? RPAREN
+    | LSQUARE_NEW (AS type_def COLON)? rawseq (COMMA rawseq)* RBRAK
+    | OBJECT annotation? cap? (IS type_def)? members END
+    | LCURLY annotation? cap? ID? typeparams? (LPAREN | LPAREN_NEW) params? RPAREN lambdacaptures? (COLON type_def)? WAT? STRONG_ROCKET rawseq RCURLY cap?
+    | LAMBDA annotation? cap? ID? typeparams? (LPAREN | LPAREN_NEW) params? RPAREN lambdacaptures? (COLON type_def)? WAT? STRONG_ROCKET rawseq END
+    | CINNAMONROLL (ID | STRING) typeargs? (LPAREN | LPAREN_NEW) positional? named? RPAREN WAT?
+    | LOC
+
+atom
+    ::= ID
+    | THIS
+    | literal
+    | (LPAREN | LPAREN_NEW) rawseq tuple? RPAREN
+    | (LBRAK | LSQUARE_NEW) (AS type_def COLON)? rawseq (COMMA rawseq)* RBRAK
+    | OBJECT annotation? cap? (IS type_def)? members END
+    | LCURLY annotation? cap? ID? typeparams? (LPAREN | LPAREN_NEW) params? RPAREN lambdacaptures? (COLON type_def)? WAT? STRONG_ROCKET rawseq RCURLY cap?
+    | LAMBDA annotation? cap? ID? typeparams? (LPAREN | LPAREN_NEW) params? RPAREN lambdacaptures? (COLON type_def)? WAT? STRONG_ROCKET rawseq END
+    | CINNAMONROLL (ID | STRING) typeargs? (LPAREN | LPAREN_NEW) positional? named? RPAREN WAT?
+    | LOC
+
+tuple
+    ::= COMMA rawseq (COMMA rawseq)*
+
+lambdacaptures
+    ::= (LPAREN | LPAREN_NEW) (lambdacapture | THIS) (COMMA (lambdacapture | THIS))* RPAREN
+
+lambdacapture
+    ::= ID (COLON type_def)? (EQ infix)?
+
+positional
+    ::= rawseq (COMMA rawseq)*
+
+named
+    ::= WHERE namedarg (COMMA namedarg)*
+
+namedarg
+    ::= ID EQ rawseq
+
+type_def
+    ::= atomtype (WEAK_ROCKET type_def)?
+
+atomtype
+    ::= THIS
+    | cap
+    | (LPAREN | LPAREN_NEW) infixtype tupletype? RPAREN
+    | nominal
+    | lambdatype
+
+lambdatype
+    ::= LCURLY cap? ID? typeparams? (LPAREN | LPAREN_NEW) (type_def (COMMA type_def)*)? RPAREN (COLON type_def)? WAT? RCURLY (cap | gencap)? (CARAT | EXCL)?
+
+tupletype
+    ::= COMMA infixtype (COMMA infixtype)*
+
+infixtype
+    ::= type_def antlr_4*
+
+isecttype
+    ::= AMPERSAND type_def
+
+uniontype
+    ::= PIPE type_def
+
+nominal
+    ::= ID (DOT ID)? typeargs? (cap | gencap)? (CARAT | EXCL)?
+
+gencap
+    ::= POUND_READ
+    | POUND_SEND
+    | POUND_SHARE
+    | POUND_ALIAS
+    | POUND_ANY
+
+cap
+    ::= ISO
+    | TRN
+    | REF
+    | VAL
+    | BOX
+    | TAG
+
+typeargs
+    ::= LBRAK typearg (COMMA typearg)* RBRAK
+
+typeparams
+    ::= (LBRAK | LSQUARE_NEW) typeparam (COMMA typeparam)* RBRAK
+
+params
+    ::= (param | DOT_DOT_DOT) (COMMA (param | DOT_DOT_DOT))*
+
+typeparam
+    ::= ID (COLON type_def)? (EQ typearg)?
+
+typearg
+    ::= type_def
+    | literal
+    | POUND postfix
+
+literal
+    ::= TRUE
+    | FALSE
+    | INT
+    | FLOAT
+    | STRING
+
+param
+    ::= parampattern (COLON type_def)? (EQ infix)?
+
+private antlr_0
+    ::= binop
+    | AS type_def
+
+private antlr_1
+    ::= binop
+    | AS type_def
+
+private antlr_2
+    ::= dot_id
+    | tilde_id
+    | chain_id
+    | typeargs
+    | call
+
+private antlr_3
+    ::= dot_id
+    | tilde_id
+    | chain_id
+    | typeargs
+    | call
+
+private antlr_4
+    ::= uniontype
+    | isecttype
+
+private justForTokens ::= LINE_COMMENT BLOCK_COMMENT

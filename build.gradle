@@ -1,0 +1,71 @@
+plugins {
+    id 'nebula.kotlin' version '1.1.0'
+    id 'org.jetbrains.intellij' version '0.2.5'
+    id 'java'
+}
+
+intellij {
+    version = intellij_version
+}
+
+repositories {
+    mavenCentral()
+}
+
+//configurations {
+//    jflex
+//}
+//
+//dependencies {
+//    jflex group: 'de.jflex', name: 'jflex', version: '1.6.1'
+//}
+
+def generatedGrammarKitSrc = "$buildDir/generated-src/grammar-kit"
+
+// Given a Pony BNF file, generate its Java source code.
+task bnf { Task t ->
+    t.outputs.dir("$generatedGrammarKitSrc/bnf")
+    t.inputs.file "lib/grammar-kit-1.5.1.jar"
+    t.inputs.file("pony.bnf").skipWhenEmpty()
+    doLast {
+        project.javaexec {
+            classpath = t.inputs.files - t.inputs.sourceFiles
+            main = "org.intellij.grammar.Main"
+            args t.outputs.files.singleFile
+            args t.inputs.sourceFiles.files
+        }
+    }
+    tasks["compileJava"].dependsOn t
+    tasks["compileKotlin"].mustRunAfter t
+}
+
+task jflex { Task t ->
+    t.outputs.dir("$generatedGrammarKitSrc/jflex")
+    t.inputs.file("lib/jflex-1.7.0-SNAPSHOT.jar")
+    t.inputs.file("lib/idea-flex.skeleton")
+    t.inputs.file("pony.flex").skipWhenEmpty()
+    doLast {
+        ant.taskdef(classname: 'jflex.anttask.JFlexTask', name: 'jflex', classpath: "lib/jflex-1.7.0-SNAPSHOT.jar")
+        ant.jflex(file: inputs.sourceFiles.singleFile, destDir: outputs.files.singleFile, verbose: true, skeleton: "lib/idea-flex.skeleton")
+    }
+    tasks["compileJava"].dependsOn t
+    tasks["compileKotlin"].mustRunAfter t
+}
+
+
+afterEvaluate {
+    // grammar-kit.jar requires these JAR files in the classpath to execute.
+    // However,
+    bnf.inputs.files(project.extensions.intellij.ideaDependency.jarFiles)
+}
+
+
+
+sourceSets {
+    main {
+        java {
+            srcDir(bnf.outputs.files.singleFile)
+            srcDir(jflex.outputs.files.singleFile)
+        }
+    }
+}
