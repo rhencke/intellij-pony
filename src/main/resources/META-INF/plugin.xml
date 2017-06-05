@@ -21,6 +21,7 @@
     <fileTypeFactory implementation="com.github.rhencke.intellij_pony.PonyFileTypeFactory"/>
     <lang.parserDefinition language="Pony" implementationClass="com.github.rhencke.intellij_pony.PonyParserDefinition"/>
     <lang.syntaxHighlighterFactory language="Pony" implementationClass="com.github.rhencke.intellij_pony.PonySyntaxHighlighterFactory"/>
+    <colorSettingsPage implementation="com.github.rhencke.intellij_pony.PonyColorSettingsPage"/>
   </extensions>
 
   <actions>

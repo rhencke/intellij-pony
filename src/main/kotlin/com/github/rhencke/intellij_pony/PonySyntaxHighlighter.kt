@@ -12,7 +12,7 @@ class PonySyntaxHighlighter : SyntaxHighlighterBase() {
     }
 
     override fun getTokenHighlights(tokenType: IElementType): Array<out TextAttributesKey> = when (tokenType) {
-        is PonyTokenType -> tokenType.textAttributesKeys
+        is PonyTokenType -> tokenType.colorArr
         else -> emptyArray()
     }
 }
