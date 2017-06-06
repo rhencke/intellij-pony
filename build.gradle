@@ -5,7 +5,7 @@ plugins {
 }
 
 intellij {
-    version = intellij_version
+    version = 'IU-171.4424.56'
 }
 
 repositories {
@@ -39,6 +39,7 @@ task bnf { Task t ->
     tasks["compileKotlin"].mustRunAfter t
 }
 
+// Given a Pony flex file, generate its Java source code.
 task jflex { Task t ->
     t.outputs.dir("$generatedGrammarKitSrc/jflex")
     t.inputs.file("lib/jflex-1.7.0-SNAPSHOT.jar")
@@ -52,14 +53,11 @@ task jflex { Task t ->
     tasks["compileKotlin"].mustRunAfter t
 }
 
-
 afterEvaluate {
     // grammar-kit.jar requires these JAR files in the classpath to execute.
-    // However,
+    // However, they are not present until after project evaluation.
     bnf.inputs.files(project.extensions.intellij.ideaDependency.jarFiles)
 }
-
-
 
 sourceSets {
     main {
