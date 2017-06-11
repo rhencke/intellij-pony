@@ -1,4 +1,4 @@
-<idea-plugin version="2">
+<idea-plugin>
   <id>com.github.rhencke.intellij_pony</id>
   <name>Pony for IntelliJ IDEA</name>
   <version>1.0</version>
@@ -19,8 +19,10 @@
 
   <extensions defaultExtensionNs="com.intellij">
     <fileTypeFactory implementation="com.github.rhencke.intellij_pony.PonyFileTypeFactory"/>
+    <lang.commenter language="Pony" implementationClass="com.github.rhencke.intellij_pony.PonyCommenter"/>
     <lang.parserDefinition language="Pony" implementationClass="com.github.rhencke.intellij_pony.PonyParserDefinition"/>
     <lang.syntaxHighlighterFactory language="Pony" implementationClass="com.github.rhencke.intellij_pony.PonySyntaxHighlighterFactory"/>
+    <sdkType implementation="com.github.rhencke.intellij_pony.sdk.PonySdkType" />
     <colorSettingsPage implementation="com.github.rhencke.intellij_pony.PonyColorSettingsPage"/>
   </extensions>
 
