@@ -25,7 +25,7 @@ def generatedGrammarKitSrc = "$buildDir/generated-src/grammar-kit"
 // Given a Pony BNF file, generate its Java source code.
 task bnf { Task t ->
     t.outputs.dir("$generatedGrammarKitSrc/bnf")
-    t.inputs.file "lib/grammar-kit-1.5.1.jar"
+    t.inputs.file "lib/grammar-kit-1.5.2.jar"
     t.inputs.file("pony.bnf").skipWhenEmpty()
     doLast {
         project.javaexec {
